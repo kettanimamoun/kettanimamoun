@@ -1,44 +1,33 @@
+library(rAmCharts)
 
-# Créer les données du tableau
-data_seuils <- data.frame(
-  Axes = c("Representativeness", "Stability", "Performance", "Complementary tests", "Complementary tests"),
-  KRI = c("Stability Index (IS)", "Stability Index (IS)", "HHI", "Spearman Correlation", "Vcramer Correlation"),
-  Critical = c(">0,25", ">0,25", ">0,7", ">0,5", ">0,5"),
-  Average = c(">0,1 and <0,25", ">0,1 and <0,25", ">0,5 and <0,7", ">0,3 and <0,5", ">0,2 and <0,5"),
-  Good = c("<0,1", "<0,1", "<0,5", "<0,3", "<0,2")
+# Supposons que `tab` est votre vecteur de données
+tab <- rnorm(1000)  # Exemple de données, remplacez par vos données réelles
+
+# Créer l'histogramme avec amHist
+histogram <- amHist(x = tab, control_hist = list(breaks = c(0, 0.001, 0.0015, 0.002, 0.005, 0.01, 0.05, 1)),
+                    col = "red", border = "red", theme = "patterns",
+                    xlab = "Default Rate", ylab = "nb_cnt", main = "Default Rate Distribution")
+
+# Calculer la densité empirique
+empirical_density <- density(tab)
+
+# Ajouter la courbe de densité empirique (rouge)
+histogram <- amLines(histogram, x = empirical_density$x, y = empirical_density$y, col = "red", lwd = 2)
+
+# Calculer la densité normale
+x_values <- seq(min(tab), max(tab), length.out = 100)
+normal_density <- dnorm(x_values, mean = mean(tab), sd = sd(tab))
+
+# Ajouter la courbe de densité normale (verte)
+histogram <- amLines(histogram, x = x_values, y = normal_density, col = "green", lwd = 2)
+
+# Ajouter une légende
+legend_labels <- list(
+  list(text = "Empirical Density", lineColor = "red"),
+  list(text = "Normal Density", lineColor = "green")
 )
+histogram <- addLegend(histogram, legend_labels)
 
-# Créer le tableau stylisé avec flextable
-ft <- flextable(data_seuils)
+# Afficher le graphique
+print(histogram)
 
-# Appliquer les styles de base
-ft <- theme_vanilla(ft)
-ft <- set_table_properties(ft, width = 1, layout = "autofit")
-
-# Style de l'entête
-ft <- bg(ft, bg = "#002D4F", part = "header")
-ft <- color(ft, color = "white", part = "header")
-ft <- fontsize(ft, size = 10, part = "header")
-
-# Style des cellules
-ft <- bg(ft, j = "Critical", bg = ifelse(data_seuils$Critical == ">0,25", "#FF0000", "transparent"))
-ft <- bg(ft, j = "Average", bg = ifelse(data_seuils$Average == ">0,1 and <0,25", "#FFA500", "transparent"))
-ft <- bg(ft, j = "Good", bg = ifelse(data_seuils$Good == "<0,1", "#228B22", "transparent"))
-
-# Appliquer les couleurs de texte
-ft <- color(ft, j = "Critical", color = ifelse(data_seuils$Critical == ">0,25", "white", "black"))
-ft <- color(ft, j = "Average", color = ifelse(data_seuils$Average == ">0,1 and <0,25", "white", "black"))
-ft <- color(ft, j = "Good", color = ifelse(data_seuils$Good == "<0,1", "white", "black"))
-
-# Ajuster la taille de la police pour les cellules
-ft <- fontsize(ft, size = 10, part = "body")
-
-# Ajuster l'espacement des colonnes
-ft <- width(ft, j = 1, width = 1.5)
-ft <- width(ft, j = 2, width = 1.5)
-ft <- width(ft, j = 3, width = 1.0)
-ft <- width(ft, j = 4, width = 1.5)
-ft <- width(ft, j = 5, width = 1.0)
-
-# Afficher le tableau
-ft
