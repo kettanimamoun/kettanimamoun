@@ -1,30 +1,23 @@
-# Installer et charger ggplot2 si ce n'est pas déjà fait
-if (!requireNamespace("ggplot2", quietly = TRUE)) {
-  install.packages("ggplot2")
+# Supposons que 'Studio' est votre DataFrame
+# Studio <- read.csv('votre_fichier.csv') # Exemple pour lire le fichier csv
+
+# Nombre de lignes dans le DataFrame
+n <- nrow(Studio)
+
+# Taille de chaque mini DataFrame
+size <- ceiling(n / 5)
+
+# Découper le DataFrame en 5 parties et assigner à des variables distinctes
+for (i in 1:5) {
+  start_idx <- (i - 1) * size + 1
+  end_idx <- min(i * size, n)
+  assign(paste("Studio_part", i, sep = "_"), Studio[start_idx:end_idx, ])
 }
 
-library(ggplot2)
+# Afficher les mini DataFrames
+print(Studio_part_1)
+print(Studio_part_2)
+print(Studio_part_3)
+print(Studio_part_4)
+print(Studio_part_5)
 
-# Exemple de données pour tab_plot_1
-tab_plot_1 <- data.frame(
-  description = c("0-4 years", "5-9 years", "10-14 years", "15-19 years", "20-24 years"),
-  value = c(500, 450, 400, 350, 300)
-)
-
-# Calculer le pourcentage
-total <- sum(tab_plot_1$value)
-tab_plot_1$percentage <- (tab_plot_1$value / total) * 100
-
-# Arrondir les pourcentages pour une meilleure lisibilité
-tab_plot_1$percentage <- round(tab_plot_1$percentage, 2)
-
-# Créer le graphique en entonnoir
-ggplot(tab_plot_1, aes(x = reorder(description, -value), y = value, fill = description)) +
-  geom_bar(stat = "identity", width = 0.6) +
-  coord_flip() +
-  geom_text(aes(label = paste0(percentage, "%")), hjust = -0.1) +
-  labs(title = "Population Pyramid Example", x = "Age Group", y = "Value") +
-  theme_minimal() +
-  theme(legend.position = "none")
-
-  
